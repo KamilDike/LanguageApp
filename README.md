@@ -1,5 +1,11 @@
 # controler
 Repozytorium do zarządzania aplikacją kontrolera.
+## Code
+## Android
+## Firebase
+ [Project overwiev](https://console.firebase.google.com/project/lpmf-72ab5/overview)
+
+## Design
 ###### Schamat kolorów aplikacji:
 - **Girls**
     - primary ![#f03c15](https://placehold.it/15/511845/000000?text=+) `#511845`
