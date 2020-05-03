@@ -19,7 +19,7 @@ on-background: #454444
 on-error: #ffffff
 
 
-- !primary   [#511845](https://placehold.it/15/f03c15/000000?text=+) `#511845`
-- !primary variant   [#900c3f](https://placehold.it/15/c5f015/000000?text=+) `#900c3f`
-- !secondary   [#c70039](https://placehold.it/15/1589F0/000000?text=+) `#c70039`
-- !secondary variant    [#ff5733](https://placehold.it/15/1589F0/000000?text=+) `#ff5733`
+- !primary[#511845](https://placehold.it/15/f03c15/000000?text=+) `#511845`
+- !primaryVariant[#900c3f](https://placehold.it/15/c5f015/000000?text=+) `#900c3f`
+- !secondary[#c70039](https://placehold.it/15/1589F0/000000?text=+) `#c70039`
+- !secondaryVariant[#ff5733](https://placehold.it/15/1589F0/000000?text=+) `#ff5733`
