@@ -1,5 +1,9 @@
 # controler
 Repozytorium do zarządzania aplikacją kontrolera.
+## Deadlines
+ - checkpoint 2 8 maja
+ - final project 19 czerwca
+
 ## Code
 ## Android
 ## Firebase
