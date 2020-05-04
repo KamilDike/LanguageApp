@@ -33,29 +33,61 @@
             android:text="@string/contr_leur"
             android:textColor="@color/onPrimary"
             android:textSize="48sp" />
+        <View
+            android:id="@+id/ellipse_4"
+            android:layout_width="263dp"
+            android:layout_height="263dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/ic_ellipse_4"
+            android:layout_marginTop="-20dp"
+            />
+
+        <TextView
+            android:id="@+id/choisir"
+            android:layout_width="96dp"
+            android:layout_height="28dp"
+            android:layout_alignBottom="@+id/ellipse_4"
+            android:layout_centerInParent="true"
+            android:layout_marginBottom="21dp"
+            android:gravity="center_horizontal|top"
+            android:text="@string/choisir"
+            android:textColor="@color/onBackground"
+            android:textSize="24sp" />
+
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/frame_1"
+            android:layout_width="159dp"
+            android:layout_height="159dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/ic_frame_1"
+            />
 
         <View
             android:id="@+id/vector_4"
             android:layout_width="match_parent"
-            android:layout_height="317dp"
+            android:layout_height="330dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:layout_marginLeft="-10dp"
             android:layout_marginTop="-70dp"
             android:background="@drawable/ic_vector_4"
             android:elevation="4dp" />
-        <View
-            android:id="@+id/ic_group_1"
-            android:layout_width="82dp"
-            android:layout_height="82dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="51dp"
-            android:layout_marginBottom="86dp"
-            android:background="#00000000"
-            android:translationZ="20dp" />
 
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/frame_2"
+            android:layout_width="95dp"
+            android:layout_height="95dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="20dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="40dp"
+            android:background="@drawable/ic_frame_2"
+            android:translationZ="20dp"
+            />
 
         <View
             android:id="@+id/vector_1"

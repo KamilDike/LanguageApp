@@ -6,4 +6,5 @@
 
     <color name="black_overlay">#66000000</color>
     <color name="onPrimary">#F4F4F4</color>
+    <color name="onBackground">#454444</color>
 </resources>
