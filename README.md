@@ -8,7 +8,8 @@ Repozytorium do zarządzania aplikacją kontrolera.
 ## Android
 ## Firebase
  [Project overwiev](https://console.firebase.google.com/project/lpmf-72ab5/overview)
-
+## Story
+ [Script](https://docs.google.com/document/d/1L0eFUSoz42dSQY7osH93UFABmda5jy-KKXjIcAwO5cI/edit?usp=sharing)
 ## Design
 ###### Schamat kolorów aplikacji:
 - **Girls**
