@@ -88,7 +88,28 @@
             android:background="@drawable/ic_frame_2"
             android:translationZ="20dp"
             />
-
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/rectangle_1"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="0dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="0dp"
+            android:background="@drawable/ic_rectangle_1"
+            android:translationZ="20dp"
+            />
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/frame_3"
+            android:layout_width="159dp"
+            android:layout_height="159dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/ic_frame_3"
+            android:visibility="invisible"
+            />
         <View
             android:id="@+id/vector_1"
             android:layout_width="match_parent"
