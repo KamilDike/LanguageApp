@@ -1,7 +1,8 @@
 # controler
 Repozytorium do zarządzania aplikacją kontrolera.
 ## Deadlines
- - checkpoint 2 8 maja
+ - checkpoint drugi 8 maja
+ - zapoznanie z projektem, odczyt danych z czujników, interpretacja danych 9 maja
  - final project 19 czerwca
 
 ## Code
