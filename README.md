@@ -6,7 +6,19 @@ Repozytorium do zarządzania aplikacją kontrolera.
  - final project 19 czerwca
 
 ## Code
-## Android
+## Android Studio
+### Rozpoczynanie pracy oraz odpowiednia konfiguracja repozytorium (Windows)
+- Należy otworzyć konsolę cmd
+- Przejść do katalogu docelowego w którym planujemy umieścić repozytorium
+- Wykonać komendę git clone <adresRepozytorium>
+- Uruchomić android Studio klikając na folder z projektem prawym przyciskiem myszy i wybierając z menu kontekstowego opcję otwórz jako projekt
+- Jeżli powyższa opcja jest niedostępna należy otworzyć program android studio i w nim otworzyć projekt z dysku
+### Praca z repozytorium
+- Przed rozpoczęciem pracy w cmd w folderze z projektem należy wpisać komendę git pull, po wpisaniu komendy dane zostaną zaktualizowane, można otworzyć android studio.
+- Po wykonaniu określonej ilości pracy którą chielibyśmy dodać do repozytorium (należy wykonywać tak często jak często używamy przycisku zapisz, np. po każdym znaczącym osiągnięciu w projekcie; skończona funkcja; dodano dużo plików graficznych itd.) należy wpisać komendę "git add ."
+- Następnie komendę git commit -m "Opis dokonanych zmian"
+- Po skończonym dniu pracy lub znacznym czasie należy zaktualizować główny branch komendą git push. Po pomyślnie wykonanej komendzie git push zmiany będą widoczne dla wszystkich kożystających z repozytorium.
+- Możliwa jest sytuacja w której git poinformuje o problemie ze scaleniem danych. Należy wtedy użyć komendy git merge.
 ## Firebase
  [Project overwiev](https://console.firebase.google.com/project/lpmf-72ab5/overview)
 ## Story
