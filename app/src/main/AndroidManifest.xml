@@ -9,7 +9,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".GrabPage"></activity>
+        <activity android:name=".WagglePage"></activity>
+        <activity android:name=".GrabPage" />
         <activity
             android:name=".ContrlPage"
             android:configChanges="orientation|keyboardHidden|screenSize"
