@@ -9,18 +9,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".LightPage"></activity>
-        <activity android:name=".WagglePage" />
-        <activity android:name=".GrabPage" />
+        <activity android:name=".LightPage"
+            android:exported="true"></activity>
+        <activity android:name=".WagglePage"
+            android:exported="true"/>
+        <activity android:name=".GrabPage"
+            android:exported="true"/>
         <activity
             android:name=".ContrlPage"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_contrl_page"
-            android:theme="@style/FullscreenTheme" />
+            android:theme="@style/FullscreenTheme"
+            android:exported="true"/>
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

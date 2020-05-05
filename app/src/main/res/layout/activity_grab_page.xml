@@ -25,7 +25,7 @@
             android:layout_height="242dp"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:clipToOutline="true"
+
             android:background="@drawable/ic_hand_svgrepo_com"
             />
         <!-- Rectangle 1 -->
@@ -111,7 +111,7 @@
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="40dp"
             android:background="@drawable/ic_frame_2"
-            android:elevation="4dp"
+            android:onClick="resetMousePointer"
             />
 
 

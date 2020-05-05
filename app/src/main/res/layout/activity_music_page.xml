@@ -127,9 +127,8 @@
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="40dp"
             android:background="@drawable/ic_frame_2"
-            android:elevation="4dp"
+            android:onClick="resetMousePointer"
             />
-
         <!-- la Musique -->
         <TextView
             android:id="@+id/la_musique"

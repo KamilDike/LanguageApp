@@ -32,5 +32,7 @@
     <style name="la_musique">
         <item name="android:textSize">48sp</item>
     </style>
-
+    <style name="generalnotitle">
+    <item name="android:windowNoTitle">true</item>
+    </style>style>
 </resources>
