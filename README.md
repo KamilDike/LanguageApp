@@ -25,7 +25,7 @@ Repozytorium do zarządzania aplikacją kontrolera.
  - Należy podłączyć telefon kablem do komputera i poczekać aż nazwa telefonu zostanie wyświetlona jako urządzenie do debugowania obok przycisku run.
  - Run -> Edit configurations
  - Następnie z poanelu po lewej wybieramy aplikację 
- - Na środku w sekcji Lounch Options Launch ustawiamy na Specified Activity
+ - Na środku w sekcji Launch Options, Launch ustawiamy na Specified Activity
  - w Activity: wpisujemy nazwę aktywności którą chcemy uruchomić np. com.example.controler.LightPage
  - Kilkamy ok
  - Należy się upewnić że w AndroidManifest.xml aktywność którą chcemy uruchomić ma dopisany atrybut  android:exported="true"
