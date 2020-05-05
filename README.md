@@ -19,6 +19,18 @@ Repozytorium do zarządzania aplikacją kontrolera.
 - Następnie komendę git commit -m "Opis dokonanych zmian"
 - Po skończonym dniu pracy lub znacznym czasie należy zaktualizować główny branch komendą git push. Po pomyślnie wykonanej komendzie git push zmiany będą widoczne dla wszystkich kożystających z repozytorium.
 - Możliwa jest sytuacja w której git poinformuje o problemie ze scaleniem danych. Należy wtedy użyć komendy git merge.
+### Uruchamianie danej aktywności na telefonie
+ - Należy skonfigurować telefon zgodnie z [dokumentacją android](https://developer.android.com/training/basics/firstapp/running-app)
+   - Włączanie obcji developerski nie jest oczywiste, warto wyszukać to w google (nie podaję tu przepisu bo to się zmienia w zależności od wersji androida).
+ - Należy podłączyć telefon kablem do komputera i poczekać aż nazwa telefonu zostanie wyświetlona jako urządzenie do debugowania obok przycisku run.
+ - Run -> Edit configurations
+ - Następnie z poanelu po lewej wybieramy aplikację 
+ - Na środku w sekcji Lounch Options Launch ustawiamy na Specified Activity
+ - w Activity: wpisujemy nazwę aktywności którą chcemy uruchomić np. com.example.controler.LightPage
+ - Kilkamy ok
+ - Należy się upewnić że w AndroidManifest.xml aktywność którą chcemy uruchomić ma dopisany atrybut  android:exported="true"
+ - Klikamy przycisk RUN i android studio rozpocznie budowę, następnie instalację aż w końcu uruchomi aplkikację na telefonie.
+ 
 ## Firebase
  [Project overwiev](https://console.firebase.google.com/project/lpmf-72ab5/overview)
 ## Story
