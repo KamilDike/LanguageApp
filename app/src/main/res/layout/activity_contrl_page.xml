@@ -55,7 +55,7 @@
             android:textColor="@color/onBackground"
             android:textSize="24sp" />
 
-        <RelativeLayout
+        <ImageButton
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/frame_1"
             android:layout_width="159dp"
@@ -100,6 +100,8 @@
             android:background="@drawable/ic_frame_3"
             android:visibility="invisible"
             />
+
+
         <View
             android:id="@+id/vector_1"
             android:layout_width="match_parent"
