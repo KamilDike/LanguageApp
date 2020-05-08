@@ -64,9 +64,10 @@ public class ContrlPage extends AppCompatActivity implements SensorEventListener
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         if(doResetSensorIfThisSmallerThanTen >11) {
             DatabaseReference myRef = database.getReference("X");
-            myRef.setValue(50 +  100 * 0.5 * tan(2 * asin(sensorEvent.values[2] - X)));
+           // y =
+            myRef.setValue(( ( (720 - 0) * (70 - (50 +  100 * 0.5 * tan(2 * asin(sensorEvent.values[2] - X)))) ) / (70 - 40 ) ) + 0);
             myRef = database.getReference("Y");
-            myRef.setValue(50 +  100 * 0.5 * tan(2 * asin(sensorEvent.values[0] - Y)));
+            myRef.setValue(( ( (500 - 0) * (64 - (50 +  100 * 0.5 * tan(2 * asin(sensorEvent.values[0] - Y)))) ) / (64 - 39 ) ) + 0);;
             myRef = database.getReference("Z");
             myRef.setValue(50 +  100 * 0.5 * tan(2 * asin(sensorEvent.values[1] - Z) ));
         } else if (doResetSensorIfThisSmallerThanTen <11){
@@ -101,9 +102,9 @@ public class ContrlPage extends AppCompatActivity implements SensorEventListener
         // Write a message to the database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference("X");
-        myRef.setValue(49);
+        myRef.setValue(360);
         myRef = database.getReference("Y");
-        myRef.setValue(49);
+        myRef.setValue(250);
         myRef = database.getReference("Z");
         myRef.setValue(49);
         doResetSensorIfThisSmallerThanTen = 0;
