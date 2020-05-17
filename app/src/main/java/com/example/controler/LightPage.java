@@ -71,7 +71,7 @@ public class LightPage extends AppCompatActivity  {
                 else if(event.values[0] > 300) {
                     lightX.cancel();
                     lightY.cancel();
-                },
+                }
             }
 
             @Override
