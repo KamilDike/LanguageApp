@@ -2,6 +2,8 @@
 package com.example.controler;
 
 import processing.core.PApplet;
+import processing.core.PImage;
+
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -28,6 +30,9 @@ public class Sketch extends PApplet  {
     float ax, ay, az;
     float nx,ny,nz;
     float alpha;
+    PImage jar;
+    float waterFlow;
+    float checkIfTheWaterShouldFlow;
 
     public void settings() {
         size(width, height);
@@ -39,29 +44,54 @@ public class Sketch extends PApplet  {
         sensor = manager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
         listener = new AccelerometerListener();
         manager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_GAME);
+        waterFlow=0;
+
 
     }
 
     public void draw() {
-        background(255);
-        if (mousePressed) {
+        background(220);
 
 
-            ellipse(mouseX, mouseY, 50, 50);
-        }
-        fill(0);
-        text("X: " + ax + "\nY: " + ay + "\nZ: " + az, 0, 0, width, height);
-
-        strokeWeight(50);
-        stroke(50,50,240);
         fill(50,50,240);
-
         translate(width/2,height/2);
         rotate(alpha);
-        rect(-width,0,2*width,height);
+        rect(-width,0 + waterFlow,2*width,height);
 
         rotate(-alpha);
         translate(-width/2,-height/2);
+
+        strokeWeight(0);
+        fill(255);
+
+        rect(0,0,width,height/4);
+        rect(0,height/4*3,width,height);
+        rotate((float)-0.1);
+        translate(-width/5,0);
+        rect(0,0,width/3,height);
+        translate(width/5,0);
+        rotate((float)0.2);
+        translate(width/5,0);
+        rect(width/3*2,0,width,height);
+        translate(-width/5,0);
+        rotate((float)-0.1);
+
+        stroke(255);
+        fill(0);
+        text(alpha,50,50);
+        text(ay,50,80);
+        text(az,50,110);
+
+        if(alpha < -0.940 ){
+            fill(0,0,255);
+            rect(width/3*2,0,width,height/4);
+        }
+        if(alpha >0.940){
+            fill(0,0,255);
+            rect(0,0,width/3,height/4);
+        }
+
+
     }
 
     class AccelerometerListener implements SensorEventListener {
@@ -75,7 +105,7 @@ public class Sketch extends PApplet  {
         @Override
         public void onSensorChanged(SensorEvent sensorEvent){
             if(doResetSensorIfThisSmallerThanTen >11) {
-               alpha = (float)(2*asin((float)(sensorEvent.values[2] - X )));
+               alpha = (2*asin((float)(sensorEvent.values[2] - X )));
 
 
                 ax = (float)(sensorEvent.values[2] - X);
