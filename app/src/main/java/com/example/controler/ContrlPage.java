@@ -60,7 +60,7 @@ public class ContrlPage extends AppCompatActivity implements SensorEventListener
     private FirebaseDatabase databaseSlide;
     private DatabaseReference slideRef;
     private Boolean firstRead = true;
-
+    private Boolean otherPageIsActive = false;
     private FirebaseDatabase database;
 
 
@@ -142,6 +142,7 @@ public class ContrlPage extends AppCompatActivity implements SensorEventListener
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
         sensorManager.registerListener( ContrlPage.this,sensor,SensorManager.SENSOR_DELAY_GAME);
+
 
         slideRef.addValueEventListener(new ValueEventListener() {
             @Override
