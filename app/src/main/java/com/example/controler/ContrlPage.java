@@ -1,6 +1,7 @@
 package com.example.controler;
 
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
@@ -8,6 +9,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -15,6 +17,7 @@ import android.hardware.SensorManager;
 import android.icu.math.BigDecimal;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -23,8 +26,11 @@ import java.lang.Math;
 import java.util.ArrayList;
 
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import processing.core.PApplet;
 
@@ -51,7 +57,11 @@ public class ContrlPage extends AppCompatActivity implements SensorEventListener
     private SpringAnimation springAnim5;
     private SpringAnimation springAnim6;
     private SpringAnimation springAnim7;
+    private FirebaseDatabase databaseSlide;
+    private DatabaseReference slideRef;
+    private Boolean firstRead = true;
 
+    private FirebaseDatabase database;
 
 
 
@@ -60,8 +70,13 @@ public class ContrlPage extends AppCompatActivity implements SensorEventListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contrl_page);
         FrameLayout myLayout = findViewById(R.id.control_page);
+        database = FirebaseDatabase.getInstance();
+
+        slideRef = database.getReference("slide");
+
         final View img = findViewById(R.id.virtualJ);
         final View img2 = findViewById(R.id.ellipse_4);
+
         springAnim = new SpringAnimation(img, DynamicAnimation.TRANSLATION_X, 200);
         springAnim2 = new SpringAnimation(img,DynamicAnimation.TRANSLATION_Y,200);
         springAnim3 = new SpringAnimation(img,DynamicAnimation.ROTATION,0);
@@ -128,6 +143,49 @@ public class ContrlPage extends AppCompatActivity implements SensorEventListener
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
         sensorManager.registerListener( ContrlPage.this,sensor,SensorManager.SENSOR_DELAY_GAME);
 
+        slideRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+               Long slide = dataSnapshot.getValue(Long.class);
+                Log.i("FROM FIREBASE", "slide");
+
+                if(firstRead==false) {
+                    if (slide == 1) {
+                        Intent myIntent = new Intent(getBaseContext(), ContrlPage.class);
+                        startActivity(myIntent);
+                    } else if (slide == 2) {
+                        Intent myIntent = new Intent(getBaseContext(), GrabPage.class);
+                        startActivity(myIntent);
+                    } else if (slide == 3) {
+                        Intent myIntent = new Intent(getBaseContext(), LightPage.class);
+                        startActivity(myIntent);
+                    } else if (slide == 4) {
+                        Intent myIntent = new Intent(getBaseContext(), MusicPage.class);
+                        startActivity(myIntent);
+                    } else if (slide == 5) {
+                        Intent myIntent = new Intent(getBaseContext(), WagglePage.class);
+                        startActivity(myIntent);
+                    } else if (slide == 6) {
+                        Intent myIntent = new Intent(getBaseContext(), WaterPage.class);
+                        startActivity(myIntent);
+                    }
+                }
+                firstRead= false;
+
+
+
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Failed to read value
+            };
+        });
+
+
+
     }
     @Override
     public void onAccuracyChanged(Sensor sensor, int i){
@@ -136,7 +194,7 @@ public class ContrlPage extends AppCompatActivity implements SensorEventListener
     @Override
     public void onSensorChanged(SensorEvent sensorEvent){
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
+
         if(doResetSensorIfThisSmallerThanTen >11) {
             DatabaseReference myRef = database.getReference("X");
             springAnim.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(sensorEvent.values[2] - X))*2);
@@ -214,4 +272,9 @@ public class ContrlPage extends AppCompatActivity implements SensorEventListener
         DatabaseReference myRef = database.getReference("accept");
         myRef.setValue("1");
     }
+
+
+
 }
+
+
