@@ -13,6 +13,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import static android.hardware.Sensor.TYPE_LIGHT;
+import static java.lang.Math.asin;
+import static java.lang.Math.tan;
+
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
@@ -35,11 +38,14 @@ public class LightPage extends AppCompatActivity  {
     SpringAnimation lightX, lightY;
     private DatabaseReference slideRef;
     private Boolean firstRead = true;
+    private float initialLight;
+    private Boolean isFirstSensorRead = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_light_page);
+        initialLight=0;
 
         final View img = findViewById(R.id.ellipse_light);
         lightX = new SpringAnimation(img,DynamicAnimation.SCALE_X,0);
@@ -68,6 +74,7 @@ public class LightPage extends AppCompatActivity  {
         slideRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
                 Long slide = dataSnapshot.getValue(Long.class);
                 Log.i("FROM FIREBASE", "slide");
 
@@ -107,18 +114,24 @@ public class LightPage extends AppCompatActivity  {
         }
 
         lightEventListener = new SensorEventListener() {
-            @Override
-            public void onSensorChanged(SensorEvent event) {
-                float value = event.values[0];
-                // getSupportActionBar().setTitle("Lumiere: " + value + "lx");
 
-                if(event.values[0] <= 300) {
-                    lightX.animateToFinalPosition((float) value / 200);
-                    lightY.animateToFinalPosition((float) value / 200);
-                }
-                else if(event.values[0] > 300) {
-                    lightX.cancel();
-                    lightY.cancel();
+            @Override
+            public void onSensorChanged(SensorEvent event){
+                if(isFirstSensorRead==false){
+                    DatabaseReference myRef = database.getReference("light");
+                    float value = event.values[0];
+                    // getSupportActionBar().setTitle("Lumiere: " + value + "lx");
+                    myRef.setValue((((255 - 0) * ((event.values[0] - initialLight) - 0)) / (1000 - 0)) + 0);
+                    if(value <=300){
+                    lightX.animateToFinalPosition(event.values[0]/200);
+                    lightY.animateToFinalPosition(event.values[0]/20);}
+                    else{
+                        lightX.cancel();
+                        lightY.cancel();
+                    }
+                }else{
+                   initialLight =  event.values[0];
+                   isFirstSensorRead = false;
                 }
             }
 
