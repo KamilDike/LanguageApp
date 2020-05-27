@@ -5,6 +5,8 @@ import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Shader;
@@ -36,33 +38,6 @@ import java.util.Arrays;
 import static java.lang.Math.asin;
 
 public class MusicPage extends AppCompatActivity {
-    //Microphone usage permission
-    private int MICROPHONE_PERMISSION_CODE = 1;
-    private void requestMicrophonePermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(MusicPage.this,
-                Manifest.permission.RECORD_AUDIO)) {
-            new AlertDialog.Builder(MusicPage.this)
-                    .setTitle("Wymagane pozwolenie użycia mikrofonu")
-                    .setMessage("Wybierz \"ok\"")
-                    .setPositiveButton("ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions(MusicPage.this,
-                                    new String[]{Manifest.permission.RECORD_AUDIO}, MICROPHONE_PERMISSION_CODE);
-                        }
-                    })
-                    .setNegativeButton("anuluj", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    })
-                    .create().show();
-        } else {
-            ActivityCompat.requestPermissions(MusicPage.this,
-                    new String[]{Manifest.permission.RECORD_AUDIO}, MICROPHONE_PERMISSION_CODE);
-        }
-    }
 
     //Microphone
     public class MicrophoneInput {
@@ -90,6 +65,8 @@ public class MusicPage extends AppCompatActivity {
                 else
                 {
                     System.out.println("Read: " + Arrays.toString(data));
+                    //Error
+                    //animateBackground();
                 }
             }
             record.stop();
@@ -323,7 +300,6 @@ public class MusicPage extends AppCompatActivity {
         });
 
         microphoneInput = new MicrophoneInput();
-        requestMicrophonePermission();
 
         colorsSlideIN = new MyColors(Color.parseColor("#FFFFFFFF"), Color.parseColor("#00D2003C"));
         colorsFadeOut = new MyColors(Color.parseColor("#00D2003C"), Color.parseColor("#FFFFFFFF"));
@@ -345,9 +321,21 @@ public class MusicPage extends AppCompatActivity {
         linearLayout.addView(textView);
         linearLayout.bringToFront();
 
-        //microphoneInput.run();
+        PackageInfo info = null;
+        try {
+            info = getPackageManager().getPackageInfo(getApplicationContext().getPackageName(), PackageManager.GET_PERMISSIONS);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        String[] permissions = info.requestedPermissions;//This array contains the requested permissions.
+
+        for (int i = 0; i < permissions.length; i++) {
+            System.out.println(permissions[i]);
+        }
 
         fadeIN();
+
+        //microphoneInput.run();
     }
     public void resetMousePointer(View view) {
         // Write a message to the database
@@ -494,8 +482,9 @@ public class MusicPage extends AppCompatActivity {
         springAnim7.getSpring().setStiffness(SpringForce.STIFFNESS_HIGH);
     }
 
-    public void animateBackground(short values[]) {
-        values[0] = (short) (Math.random()*5);
+    public void animateBackground() {
+        float values[] = new float[5];
+        values[0] = (float) (Math.random()*5);
         springAnim.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
         springAnim2.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
         springAnim3.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);

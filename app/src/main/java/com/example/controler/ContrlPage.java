@@ -3,12 +3,16 @@ package com.example.controler;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
 
+import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -185,9 +189,10 @@ public class ContrlPage extends AppCompatActivity implements SensorEventListener
             };
         });
 
-
-
+        //Request microphone permission
+        requestMicrophonePermission();
     }
+
     @Override
     public void onAccuracyChanged(Sensor sensor, int i){
 
@@ -275,6 +280,33 @@ public class ContrlPage extends AppCompatActivity implements SensorEventListener
     }
 
 
+    //Microphone usage permission
+    private int MICROPHONE_PERMISSION_CODE = 1;
+    private void requestMicrophonePermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.RECORD_AUDIO)) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Wymagane pozwolenie użycia mikrofonu")
+                    .setMessage("Wybierz \"ok\"")
+                    .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ActivityCompat.requestPermissions(ContrlPage.this,
+                                    new String[]{Manifest.permission.RECORD_AUDIO}, MICROPHONE_PERMISSION_CODE);
+                        }
+                    })
+                    .setNegativeButton("anuluj", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .create().show();
+        } else {
+            ActivityCompat.requestPermissions(ContrlPage.this,
+                    new String[]{Manifest.permission.RECORD_AUDIO}, MICROPHONE_PERMISSION_CODE);
+        }
+    }
 
 }
 
