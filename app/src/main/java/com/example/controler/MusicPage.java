@@ -21,6 +21,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.dynamicanimation.animation.DynamicAnimation;
+import androidx.dynamicanimation.animation.SpringAnimation;
+import androidx.dynamicanimation.animation.SpringForce;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -29,6 +32,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Arrays;
+
+import static java.lang.Math.asin;
 
 public class MusicPage extends AppCompatActivity {
     //Microphone usage permission
@@ -263,9 +268,22 @@ public class MusicPage extends AppCompatActivity {
     private DatabaseReference slideRef;
     private Boolean firstRead = true;
 
+    //Background animation
+    private SpringAnimation springAnim;
+    private SpringAnimation springAnim2;
+    private SpringAnimation springAnim3;
+    private SpringAnimation springAnim4;
+    private SpringAnimation springAnim5;
+    private SpringAnimation springAnim6;
+    private SpringAnimation springAnim7;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_music_page);
+
+        final View backgroundView = findViewById(R.id.ellipse_5);
+        loadBackgroundAnim(backgroundView);
 
         database = FirebaseDatabase.getInstance();
         slideRef = database.getReference("slide");
@@ -312,6 +330,8 @@ public class MusicPage extends AppCompatActivity {
 
         colorsSlideIN.setSlideColors(0);
 
+        linearLayout = (LinearLayout)findViewById(R.id.linearLayoutText);
+
         textView = new TextView(this);
         textView.setText(sText[0]);
         textView.setTextSize(40);
@@ -324,6 +344,8 @@ public class MusicPage extends AppCompatActivity {
 
         linearLayout.addView(textView);
         linearLayout.bringToFront();
+
+        //microphoneInput.run();
 
         fadeIN();
     }
@@ -417,5 +439,69 @@ public class MusicPage extends AppCompatActivity {
             songPosition++;
         else if (z == -1 && songPosition > 0)
             songPosition--;
+    }
+
+    //Load background animation object
+    public void loadBackgroundAnim(View view) {
+        springAnim = new SpringAnimation(view, DynamicAnimation.TRANSLATION_X, 200);
+        springAnim2 = new SpringAnimation(view,DynamicAnimation.TRANSLATION_Y,200);
+        springAnim3 = new SpringAnimation(view,DynamicAnimation.ROTATION,0);
+        springAnim4 = new SpringAnimation(view,DynamicAnimation.ROTATION_X,0);
+        springAnim5 = new SpringAnimation(view,DynamicAnimation.ROTATION_Y,0);
+        springAnim6 = new SpringAnimation(view,DynamicAnimation.SCALE_X,0);
+        springAnim7 = new SpringAnimation(view,DynamicAnimation.SCALE_Y,0);
+
+        springAnim.setStartValue(0);
+        springAnim.setMinValue(-200);
+        springAnim.setMaxValue((float)200); // in radians
+        springAnim.getSpring().setDampingRatio(SpringForce.DAMPING_RATIO_HIGH_BOUNCY);
+        springAnim.getSpring().setStiffness(SpringForce.STIFFNESS_HIGH);
+
+        springAnim2.setStartValue(0);
+        springAnim2.setMinValue(-200);
+        springAnim2.setMaxValue((float)200); // in radians
+        springAnim2.getSpring().setDampingRatio(SpringForce.DAMPING_RATIO_HIGH_BOUNCY);
+        springAnim2.getSpring().setStiffness(SpringForce.STIFFNESS_HIGH);
+
+        springAnim3.setStartValue(0);
+        springAnim3.setMinValue(-200);
+        springAnim3.setMaxValue((float)200); // in radians
+        springAnim3.getSpring().setDampingRatio(SpringForce.DAMPING_RATIO_HIGH_BOUNCY);
+        springAnim3.getSpring().setStiffness(SpringForce.STIFFNESS_HIGH);
+
+        springAnim4.setStartValue(0);
+        springAnim4.setMinValue(-200);
+        springAnim4.setMaxValue((float)200); // in radians
+        springAnim4.getSpring().setDampingRatio(SpringForce.DAMPING_RATIO_HIGH_BOUNCY);
+        springAnim4.getSpring().setStiffness(SpringForce.STIFFNESS_HIGH);
+
+        springAnim5.setStartValue(0);
+        springAnim5.setMinValue(-200);
+        springAnim5.setMaxValue((float)200); // in radians
+        springAnim5.getSpring().setDampingRatio(SpringForce.DAMPING_RATIO_HIGH_BOUNCY);
+        springAnim5.getSpring().setStiffness(SpringForce.STIFFNESS_HIGH);
+
+        springAnim6.setStartValue(0);
+        springAnim6.setMinValue(-200);
+        springAnim6.setMaxValue((float)200); // in radians
+        springAnim6.getSpring().setDampingRatio(SpringForce.DAMPING_RATIO_HIGH_BOUNCY);
+        springAnim6.getSpring().setStiffness(SpringForce.STIFFNESS_HIGH);
+
+        springAnim7.setStartValue(0);
+        springAnim7.setMinValue(-200);
+        springAnim7.setMaxValue((float)200); // in radians
+        springAnim7.getSpring().setDampingRatio(SpringForce.DAMPING_RATIO_HIGH_BOUNCY);
+        springAnim7.getSpring().setStiffness(SpringForce.STIFFNESS_HIGH);
+    }
+
+    public void animateBackground(short values[]) {
+        values[0] = (short) (Math.random()*5);
+        springAnim.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
+        springAnim2.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
+        springAnim3.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
+        springAnim4.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
+        springAnim5.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
+        springAnim6.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
+        springAnim7.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
     }
 }

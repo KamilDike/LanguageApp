@@ -21,6 +21,9 @@
             android:name=".GrabPage"
             android:exported="true" />
         <activity
+            android:name=".MusicPage"
+            android:exported="true" />
+        <activity
             android:name=".ContrlPage"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="true"
