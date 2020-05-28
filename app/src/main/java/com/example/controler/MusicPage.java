@@ -2,6 +2,7 @@ package com.example.controler;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,6 +15,9 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -51,7 +55,7 @@ public class MusicPage extends AppCompatActivity {
             while(recording)
             {
                 try {
-                    Thread.sleep(0);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -65,8 +69,10 @@ public class MusicPage extends AppCompatActivity {
                 else
                 {
                     System.out.println("Read: " + Arrays.toString(data));
-                    //Error
-                    //animateBackground();
+
+                    //currently fixing animation
+                    Message message = mHandler.obtainMessage((int)data[0]);
+                    message.sendToTarget();
                 }
             }
             record.stop();
@@ -254,6 +260,9 @@ public class MusicPage extends AppCompatActivity {
     private SpringAnimation springAnim6;
     private SpringAnimation springAnim7;
 
+    //Handler for ui, main thread
+    Handler mHandler;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -321,21 +330,22 @@ public class MusicPage extends AppCompatActivity {
         linearLayout.addView(textView);
         linearLayout.bringToFront();
 
-        PackageInfo info = null;
-        try {
-            info = getPackageManager().getPackageInfo(getApplicationContext().getPackageName(), PackageManager.GET_PERMISSIONS);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        String[] permissions = info.requestedPermissions;//This array contains the requested permissions.
-
-        for (int i = 0; i < permissions.length; i++) {
-            System.out.println(permissions[i]);
-        }
+        listingPermissions();
 
         fadeIN();
 
-        //microphoneInput.run();
+        microphoneInput.run();
+
+        //Using handler to manage UI, within main thread.
+        mHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message message) {
+                // This is where you do your work in the UI thread.
+                // Your worker tells you in the message what to do.
+                System.out.println(message.toString());
+                animateBackground(message.what);
+            }
+        };
     }
     public void resetMousePointer(View view) {
         // Write a message to the database
@@ -482,15 +492,30 @@ public class MusicPage extends AppCompatActivity {
         springAnim7.getSpring().setStiffness(SpringForce.STIFFNESS_HIGH);
     }
 
-    public void animateBackground() {
-        float values[] = new float[5];
-        values[0] = (float) (Math.random()*5);
-        springAnim.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
-        springAnim2.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
-        springAnim3.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
-        springAnim4.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
-        springAnim5.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
-        springAnim6.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
-        springAnim7.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
+    public void animateBackground(float value) {
+        value /= 3000;
+
+        springAnim.animateToFinalPosition(1 + value);
+        springAnim2.animateToFinalPosition(1 + value);
+//        springAnim3.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
+//        springAnim4.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
+//        springAnim5.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
+        springAnim6.animateToFinalPosition(1 + value);
+        springAnim7.animateToFinalPosition(1 + value);
+
+    }
+
+    public void listingPermissions() {
+        PackageInfo info = null;
+        try {
+            info = getPackageManager().getPackageInfo(getApplicationContext().getPackageName(), PackageManager.GET_PERMISSIONS);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        String[] permissions = info.requestedPermissions;//This array contains the requested permissions.
+
+        for (int i = 0; i < permissions.length; i++) {
+            System.out.println(permissions[i]);
+        }
     }
 }
