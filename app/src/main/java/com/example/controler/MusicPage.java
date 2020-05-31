@@ -38,6 +38,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static java.lang.Math.asin;
 
@@ -60,7 +61,8 @@ public class MusicPage extends AppCompatActivity {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-                int result = record.read(data, 0, SAMPLE_RATE/4); // read 0.25 second at a time
+                int result = record.read(data, 0, SAMPLE_RATE/8); // read 0.25 second at a time
+
                 if(result == AudioRecord.ERROR_INVALID_OPERATION || result == AudioRecord.ERROR_BAD_VALUE)
                 {
                     System.out.println("Recording error");
@@ -68,10 +70,10 @@ public class MusicPage extends AppCompatActivity {
                 }
                 else
                 {
-                    System.out.println("Read: " + Arrays.toString(data));
+                    //System.out.println("Read: " + Arrays.toString(data));
 
                     //currently fixing animation
-                    Message message = mHandler.obtainMessage((int)data[0]);
+                    Message message = mHandler.obtainMessage(findMax(data));
                     message.sendToTarget();
                 }
             }
@@ -241,7 +243,7 @@ public class MusicPage extends AppCompatActivity {
 
     int animPosition = 0;
     int songPosition = 0;
-    final String[] sText = {"Song", "About", "Sheep"};
+    final String[] sText = {"Je suis en colère", "Je suis en colère", "Costam Costam"};
     public MyColors colorsSlideIN;
     public MyColors colorsFadeOut;
     MicrophoneInput microphoneInput;
@@ -249,6 +251,7 @@ public class MusicPage extends AppCompatActivity {
     //Database configuration
     private FirebaseDatabase database;
     private DatabaseReference slideRef;
+    private DatabaseReference playSongRef;
     private Boolean firstRead = true;
 
     //Background animation
@@ -302,6 +305,33 @@ public class MusicPage extends AppCompatActivity {
                 }
                 firstRead= false;
             }
+
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Failed to read value
+            };
+        });
+
+        playSongRef = database.getReference("playSong");
+        playSongRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Long playSong = dataSnapshot.getValue(Long.class);
+                Log.i("FROM FIREBASE", "slide");
+
+                if(firstRead==false) {
+                    if (playSong == 1) {
+                        fadeIN();
+                        playSong = (long) 0;
+                    }
+                }
+                firstRead= false;
+            }
+
+
+
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 // Failed to read value
@@ -331,8 +361,6 @@ public class MusicPage extends AppCompatActivity {
         linearLayout.bringToFront();
 
         listingPermissions();
-
-        fadeIN();
 
         microphoneInput.run();
 
@@ -400,13 +428,25 @@ public class MusicPage extends AppCompatActivity {
                     paintText(1);
                     //System.out.println("Animator value = " + (float)animator.getAnimatedValue());
                 }
-                else animator.cancel();
+                else if (songPosition < 2) {
+                    animator.cancel();
+                    playSong();
+                }
+                else {
+                    animator.cancel();
+                    fadeOut();
+                }
             }
         });
         animator.setDuration(1000);
         animator.setRepeatMode(ValueAnimator.RESTART);
         animator.setRepeatCount(-1);
         animator.start();
+    }
+
+    public void playSong() {
+        fadeIN();
+        songPosition++;
     }
 
     //Fade out text
@@ -423,7 +463,10 @@ public class MusicPage extends AppCompatActivity {
                     paintText(2);
                     //System.out.println("Animator value = " + (float)animator.getAnimatedValue());
                 }
-                else animator.cancel();
+                else {
+                    animator.cancel();
+                    songPosition = 0;
+                }
             }
         });
         animator.setDuration(5000);
@@ -493,16 +536,19 @@ public class MusicPage extends AppCompatActivity {
     }
 
     public void animateBackground(float value) {
-        value /= 3000;
+        if (value > 5000)
+            value = (float) 0.75;
+        else if (value > 500)
+            value = (float) (0.75*(value/5000));
+        else value = 0;
 
-        springAnim.animateToFinalPosition(1 + value);
-        springAnim2.animateToFinalPosition(1 + value);
+//        springAnim.animateToFinalPosition(1 + value);
+//        springAnim2.animateToFinalPosition(1 + value);
 //        springAnim3.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
 //        springAnim4.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
 //        springAnim5.animateToFinalPosition(-(float)Math.toDegrees(2 * asin(values[0]))*2);
-        springAnim6.animateToFinalPosition(1 + value);
-        springAnim7.animateToFinalPosition(1 + value);
-
+        springAnim6.animateToFinalPosition((float) (1 + value*0.5));
+        springAnim7.animateToFinalPosition((float) (1 + value));
     }
 
     public void listingPermissions() {
@@ -518,4 +564,12 @@ public class MusicPage extends AppCompatActivity {
             System.out.println(permissions[i]);
         }
     }
+
+    public short findMax(final short[] arr) {
+        short o_intMax = arr[0];
+        for ( int p_intI = 1; p_intI < arr.length; p_intI++)
+            if ( arr[p_intI] > o_intMax )
+                o_intMax = arr[p_intI];
+        return o_intMax;
+    } // end method
 }
