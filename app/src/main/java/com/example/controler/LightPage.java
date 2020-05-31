@@ -31,12 +31,13 @@ import com.google.firebase.database.ValueEventListener;
 
 public class LightPage extends AppCompatActivity  {
     private FirebaseDatabase database;
+    private DatabaseReference slideRef;
+    private DatabaseReference myRef;
     private SensorManager sensorManager;
     private Sensor lightSensor;
     private SensorEventListener lightEventListener;
     private View ellipse_light;
     SpringAnimation lightX, lightY;
-    private DatabaseReference slideRef;
     private Boolean firstRead = true;
     private float initialLight;
     private Boolean isFirstSensorRead = true;
@@ -51,13 +52,13 @@ public class LightPage extends AppCompatActivity  {
         lightX = new SpringAnimation(img,DynamicAnimation.SCALE_X,0);
         lightY = new SpringAnimation(img,DynamicAnimation.SCALE_Y,0);
 
-        lightX.setStartValue(0);
+        lightX.setStartValue(initialLight);
         lightX.setMinValue(0);
         lightX.setMaxValue(10000000000L);
         lightX.getSpring().setDampingRatio(SpringForce.DAMPING_RATIO_HIGH_BOUNCY);
         lightX.getSpring().setStiffness(SpringForce.STIFFNESS_LOW);
 
-        lightY.setStartValue(0);
+        lightY.setStartValue(initialLight);
         lightY.setMinValue(0);
         lightY.setMaxValue(10000000000L);
         lightY.getSpring().setDampingRatio(SpringForce.DAMPING_RATIO_HIGH_BOUNCY);
@@ -70,6 +71,7 @@ public class LightPage extends AppCompatActivity  {
 
         database = FirebaseDatabase.getInstance();
         slideRef = database.getReference("slide");
+        myRef = database.getReference("light");
 
         slideRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -114,25 +116,18 @@ public class LightPage extends AppCompatActivity  {
         }
 
         lightEventListener = new SensorEventListener() {
-
             @Override
             public void onSensorChanged(SensorEvent event){
-                if(isFirstSensorRead==false){
-                    DatabaseReference myRef = database.getReference("light");
                     float value = event.values[0];
                     // getSupportActionBar().setTitle("Lumiere: " + value + "lx");
                     myRef.setValue((((255 - 0) * ((event.values[0] - initialLight) - 0)) / (1000 - 0)) + 0);
                     if(value <=300){
                     lightX.animateToFinalPosition(event.values[0]/200);
-                    lightY.animateToFinalPosition(event.values[0]/20);}
+                    lightY.animateToFinalPosition(event.values[0]/200);}
                     else{
                         lightX.cancel();
                         lightY.cancel();
                     }
-                }else{
-                   initialLight =  event.values[0];
-                   isFirstSensorRead = false;
-                }
             }
 
             @Override
