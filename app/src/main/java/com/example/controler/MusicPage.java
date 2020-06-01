@@ -20,6 +20,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -113,6 +114,8 @@ public class MusicPage extends AppCompatActivity {
                 recording = false;
             }
         }
+
+        public void stopRecording() { recording = false; }
     }
 
     //Colors for text
@@ -240,10 +243,11 @@ public class MusicPage extends AppCompatActivity {
 
     LinearLayout linearLayout;
     TextView textView;
+    Button btnPlaySong;
 
     int animPosition = 0;
     int songPosition = 0;
-    final String[] sText = {"Je suis en colère", "Je suis en colère", "Costam Costam"};
+    String[] songText;
     public MyColors colorsSlideIN;
     public MyColors colorsFadeOut;
     MicrophoneInput microphoneInput;
@@ -274,6 +278,9 @@ public class MusicPage extends AppCompatActivity {
         final View backgroundView = findViewById(R.id.ellipse_5);
         loadBackgroundAnim(backgroundView);
 
+        songText = new String[20];
+        loadSong(1);
+        btnPlaySong = findViewById(R.id.btnPlaySong);
         database = FirebaseDatabase.getInstance();
         slideRef = database.getReference("slide");
         slideRef.addValueEventListener(new ValueEventListener() {
@@ -329,9 +336,6 @@ public class MusicPage extends AppCompatActivity {
                 }
                 firstRead= false;
             }
-
-
-
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 // Failed to read value
@@ -348,7 +352,7 @@ public class MusicPage extends AppCompatActivity {
         linearLayout = (LinearLayout)findViewById(R.id.linearLayoutText);
 
         textView = new TextView(this);
-        textView.setText(sText[0]);
+        textView.setText(songText[0]);
         textView.setTextSize(40);
 
         Shader textShader;
@@ -362,8 +366,6 @@ public class MusicPage extends AppCompatActivity {
 
         listingPermissions();
 
-        microphoneInput.run();
-
         //Using handler to manage UI, within main thread.
         mHandler = new Handler(Looper.getMainLooper()) {
             @Override
@@ -374,6 +376,16 @@ public class MusicPage extends AppCompatActivity {
                 animateBackground(message.what);
             }
         };
+
+        //Play song button
+        btnPlaySong.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                microphoneInput.run();
+                fadeIN();
+                btnPlaySong.setVisibility(View.GONE);
+            }
+        });
     }
     public void resetMousePointer(View view) {
         // Write a message to the database
@@ -395,7 +407,7 @@ public class MusicPage extends AppCompatActivity {
         else colorsFadeOut.setFadeColors(animPosition);
 
         textView = new TextView(MusicPage.this);
-        textView.setText(sText[songPosition]);
+        textView.setText(songText[songPosition]);
         textView.setTextSize(40);
 
         //System.out.println("Animation position = " + animPosition);
@@ -428,12 +440,14 @@ public class MusicPage extends AppCompatActivity {
                     paintText(1);
                     //System.out.println("Animator value = " + (float)animator.getAnimatedValue());
                 }
-                else if (songPosition < 2) {
+                else if (songPosition < 14) {
                     animator.cancel();
-                    playSong();
+                    changeLine();
                 }
                 else {
                     animator.cancel();
+                    microphoneInput.stopRecording();
+                    btnPlaySong.setVisibility(View.VISIBLE);
                     fadeOut();
                 }
             }
@@ -444,7 +458,8 @@ public class MusicPage extends AppCompatActivity {
         animator.start();
     }
 
-    public void playSong() {
+    //Switch text line
+    public void changeLine() {
         fadeIN();
         songPosition++;
     }
@@ -472,14 +487,6 @@ public class MusicPage extends AppCompatActivity {
         animator.setDuration(5000);
         animator.setRepeatMode(ValueAnimator.RESTART);
         animator.start();
-    }
-
-    //Switch text line
-    public void changeLine(int z) {
-        if (sText.length > songPosition + 1 && z == 1)
-            songPosition++;
-        else if (z == -1 && songPosition > 0)
-            songPosition--;
     }
 
     //Load background animation object
@@ -535,6 +542,7 @@ public class MusicPage extends AppCompatActivity {
         springAnim7.getSpring().setStiffness(SpringForce.STIFFNESS_HIGH);
     }
 
+    //Background animations
     public void animateBackground(float value) {
         if (value > 5000)
             value = (float) 0.75;
@@ -551,6 +559,7 @@ public class MusicPage extends AppCompatActivity {
         springAnim7.animateToFinalPosition((float) (1 + value));
     }
 
+    //Listing app permissions
     public void listingPermissions() {
         PackageInfo info = null;
         try {
@@ -565,6 +574,7 @@ public class MusicPage extends AppCompatActivity {
         }
     }
 
+    //Finding max value in shorts array
     public short findMax(final short[] arr) {
         short o_intMax = arr[0];
         for ( int p_intI = 1; p_intI < arr.length; p_intI++)
@@ -572,4 +582,19 @@ public class MusicPage extends AppCompatActivity {
                 o_intMax = arr[p_intI];
         return o_intMax;
     } // end method
+
+    //Loading song, 1 - On Va Au Bal
+    public void loadSong(int z) {
+        if (z == 1) {
+            String line1 = "On va au bal";
+            String line2 = "On va du ciel";
+            for (int i = 0; i < 14; i++) {
+                if (i < 4)
+                    songText[i] = line1;
+                else if (i < 8)
+                    songText[i] = line2;
+                else songText[i] = line1;
+            }
+        }
+    }
 }
