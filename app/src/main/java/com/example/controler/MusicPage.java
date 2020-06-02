@@ -1,6 +1,7 @@
 package com.example.controler;
 
 import android.Manifest;
+import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -77,7 +78,7 @@ public class MusicPage extends AppCompatActivity {
                     //System.out.println("Read: " + Arrays.toString(data));
 
                     //currently fixing animation
-                    Message message = mHandler.obtainMessage(findMax(data));
+                    Message message = backgroundAnimationHandler.obtainMessage(findMax(data));
                     message.sendToTarget();
                 }
             }
@@ -250,6 +251,7 @@ public class MusicPage extends AppCompatActivity {
 
     int animPosition = 0;
     int songPosition = 0;
+    int[] songAnimationDelay;
     String[] songText;
     public MyColors colorsSlideIN;
     public MyColors colorsFadeOut;
@@ -275,7 +277,8 @@ public class MusicPage extends AppCompatActivity {
     private SpringAnimation springAnim7;
 
     //Handler for ui, main thread
-    Handler mHandler;
+    Handler backgroundAnimationHandler;
+    Handler textAnimationHandler;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -338,7 +341,11 @@ public class MusicPage extends AppCompatActivity {
 
                 if(firstRead==false) {
                     if (playSong == 1) {
-                        fadeIN();
+                        try {
+                            fadeIN();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                         playSong = (long) 0;
                     }
                 }
@@ -375,13 +382,19 @@ public class MusicPage extends AppCompatActivity {
         listingPermissions();
 
         //Using handler to manage UI, within main thread.
-        mHandler = new Handler(Looper.getMainLooper()) {
+        backgroundAnimationHandler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message message) {
                 // This is where you do your work in the UI thread.
                 // Your worker tells you in the message what to do.
-                System.out.println(message.toString());
                 animateBackground(message.what);
+            }
+        };
+
+        textAnimationHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message message) {
+                paintText(message.what);
             }
         };
 
@@ -390,7 +403,6 @@ public class MusicPage extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 microphoneInput.run();
-                fadeIN();
                 btnPlaySong.setVisibility(View.GONE);
                 try {
                     assetFileDescriptor = getAssets().openFd("Audio.mp3");
@@ -398,6 +410,7 @@ public class MusicPage extends AppCompatActivity {
                             assetFileDescriptor.getStartOffset(),assetFileDescriptor.getLength());
                     mediaPlayer.prepare();
                     mediaPlayer.start();
+                    textAnimationThread.start();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -443,8 +456,8 @@ public class MusicPage extends AppCompatActivity {
         linearLayout.addView(textView);
     }
 
-    //Appear text
-    public void fadeIN() {
+    //Appear text with animator, currently managed in Thread.
+    public void fadeIN() throws InterruptedException {
         animPosition = 0;
         paintText(1);
 
@@ -452,34 +465,37 @@ public class MusicPage extends AppCompatActivity {
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                if (animPosition < 110) {
-                    animPosition++;
-                    paintText(1);
-                    //System.out.println("Animator value = " + (float)animator.getAnimatedValue());
-                }
-                else if (songPosition < 14) {
-                    animator.cancel();
-                    changeLine();
-                }
-                else {
-                    animator.cancel();
-                    microphoneInput.stopRecording();
-                    btnPlaySong.setVisibility(View.VISIBLE);
-                    fadeOut();
-                    mediaPlayer.release();
-                    mediaPlayer = null;
+                if (animator.getCurrentPlayTime() >= songAnimationDelay[songPosition]) {
+                    if (animPosition < 110) {
+                        animPosition++;
+                        paintText(1);
+                        //System.out.println("Animator value = " + (float)animator.getAnimatedValue());
+                    } else if (songPosition < 14) {
+                        animator.cancel();
+                        try {
+                            changeLine();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        animator.cancel();
+                        microphoneInput.stopRecording();
+                        btnPlaySong.setVisibility(View.VISIBLE);
+                        fadeOut();
+                        mediaPlayer.release();
+                        mediaPlayer = null;
+                    }
                 }
             }
         });
-        animator.setDuration(1000);
+        animator.setDuration(1);
         animator.setRepeatMode(ValueAnimator.RESTART);
         animator.setRepeatCount(-1);
         animator.start();
     }
 
     //Switch text line
-    public void changeLine() {
-        fadeIN();
+    public void changeLine() throws InterruptedException {
         songPosition++;
     }
 
@@ -605,15 +621,74 @@ public class MusicPage extends AppCompatActivity {
     //Loading song, 1 - On Va Au Bal
     public void loadSong(int z) {
         if (z == 1) {
+            songAnimationDelay = new int[20];
+
+            songText = new String[20];
             String line1 = "On va au bal";
             String line2 = "On va du ciel";
             for (int i = 0; i < 14; i++) {
-                if (i < 4)
+                songAnimationDelay[i] = 250;
+                if (i < 4) {
                     songText[i] = line1;
-                else if (i < 8)
+                }
+                else if (i < 8) {
                     songText[i] = line2;
-                else songText[i] = line1;
+                }
+                else {
+                    songText[i] = line1;
+                }
             }
+            songAnimationDelay[0] = 6000;
         }
     }
+
+    //Text animation
+    Thread textAnimationThread = new Thread(new Runnable() {
+        int animationFlag = 1;
+        @Override
+        public void run() {
+            animPosition = 0; // 1 - Wait delay, 0 - do not.
+            int type = 1; // 1 - fadeIn, 2 - fadeOut.
+
+            while (true) {
+                if (animationFlag == 1) {
+                    try {
+                        Thread.sleep(songAnimationDelay[songPosition]);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else {
+                    try {
+                        Thread.sleep(12);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if (animPosition < 110) {
+                    animPosition++;
+                    type = 1;
+                    animationFlag = 0;
+                    Message message = textAnimationHandler.obtainMessage(type);
+                    message.sendToTarget();
+                } else if (songPosition < 14) {
+                    songPosition++;
+                    animPosition = 0;
+                    animationFlag = 1;
+                } else {
+                    type = 2;
+                    microphoneInput.stopRecording();
+                    mediaPlayer.release();
+                    mediaPlayer = null;
+                    animationFlag = 0;
+                    Message message2 = backgroundAnimationHandler.obtainMessage(type);
+                    message2.sendToTarget();
+                    Message message = textAnimationHandler.obtainMessage(type);
+                    message.sendToTarget();
+                    return;
+                }
+            }
+        }
+    });
 }
