@@ -8,11 +8,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Shader;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,6 +40,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -252,6 +255,10 @@ public class MusicPage extends AppCompatActivity {
     public MyColors colorsFadeOut;
     MicrophoneInput microphoneInput;
 
+    //MediaPlayer
+    MediaPlayer mediaPlayer;
+    AssetFileDescriptor assetFileDescriptor;
+
     //Database configuration
     private FirebaseDatabase database;
     private DatabaseReference slideRef;
@@ -279,6 +286,7 @@ public class MusicPage extends AppCompatActivity {
         loadBackgroundAnim(backgroundView);
 
         songText = new String[20];
+        mediaPlayer = new MediaPlayer();
         loadSong(1);
         btnPlaySong = findViewById(R.id.btnPlaySong);
         database = FirebaseDatabase.getInstance();
@@ -384,6 +392,15 @@ public class MusicPage extends AppCompatActivity {
                 microphoneInput.run();
                 fadeIN();
                 btnPlaySong.setVisibility(View.GONE);
+                try {
+                    assetFileDescriptor = getAssets().openFd("Audio.mp3");
+                    mediaPlayer.setDataSource(assetFileDescriptor.getFileDescriptor(),
+                            assetFileDescriptor.getStartOffset(),assetFileDescriptor.getLength());
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -449,6 +466,8 @@ public class MusicPage extends AppCompatActivity {
                     microphoneInput.stopRecording();
                     btnPlaySong.setVisibility(View.VISIBLE);
                     fadeOut();
+                    mediaPlayer.release();
+                    mediaPlayer = null;
                 }
             }
         });
