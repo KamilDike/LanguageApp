@@ -49,7 +49,7 @@ import static java.lang.Math.asin;
 
 public class MusicPage extends AppCompatActivity {
 
-    //Microphone
+    //Microphone runnable
     public class MicrophoneInput {
         private static final int SAMPLE_RATE = 44100;
         private boolean recording;
@@ -245,6 +245,69 @@ public class MusicPage extends AppCompatActivity {
         }
     }
 
+    //Text animation runnable
+    class TextAnimation {
+        boolean running;
+
+        public void run() {
+            running = true;
+            animPosition = 0;
+
+            new Thread() {
+                @Override
+                public void run() {
+                    startAnimation();
+                }
+            }.start();
+        }
+
+        private void startAnimation() {
+            sleep(songAnimationDelay[songPosition]);
+            int type = 1; // 1 - fadeIn, 0 - fadeOut.
+            while (running) {
+                System.out.println("SongPos: " + songPosition + "\nAnimPos: " + animPosition);
+                if (animPosition < 110 && songPosition < 14) {
+                    type = 1;
+                    animPosition++;
+                    Message message = textAnimationHandler.obtainMessage(type);
+                    message.sendToTarget();
+                    sleep(10);
+                } else if (songPosition < 14) {
+                    songPosition++;
+                    animPosition = 0;
+                    sleep(songAnimationDelay[songPosition]);
+                } else {
+                    animPosition = 0;
+                    type = 0;
+                    microphoneInput.stopRecording();
+                    //mediaPlayer.release();
+                    //mediaPlayer = null;
+                    Message message2 = backgroundAnimationHandler.obtainMessage(0);
+                    message2.sendToTarget();
+                    running = false;
+
+                    for (int i = 0; i < 110; i++) {
+                        animPosition++;
+                        Message message = textAnimationHandler.obtainMessage(type);
+                        message.sendToTarget();
+                        sleep(20);
+                    }
+                }
+            }
+        }
+
+        private void sleep(int time) {
+            try {
+                Thread.sleep(time);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        void stop() {
+            running = false;
+        }
+    }
+
     LinearLayout linearLayout;
     TextView textView;
     Button btnPlaySong;
@@ -279,6 +342,9 @@ public class MusicPage extends AppCompatActivity {
     //Handler for ui, main thread
     Handler backgroundAnimationHandler;
     Handler textAnimationHandler;
+
+    //Text animation object
+    TextAnimation textAnimation;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -357,6 +423,7 @@ public class MusicPage extends AppCompatActivity {
             };
         });
 
+        textAnimation = new TextAnimation();
         microphoneInput = new MicrophoneInput();
 
         colorsSlideIN = new MyColors(Color.parseColor("#FFFFFFFF"), Color.parseColor("#00D2003C"));
@@ -394,7 +461,17 @@ public class MusicPage extends AppCompatActivity {
         textAnimationHandler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message message) {
-                paintText(message.what);
+                if (message.what == 1)
+                    paintText(1);
+                else if (message.what == 0) {
+                    paintText(0);
+                    if (animPosition == 110)
+                    {
+                        btnPlaySong.setVisibility(View.VISIBLE);
+                        songPosition = 0;
+                        textAnimation.stop();
+                    }
+                }
             }
         };
 
@@ -402,16 +479,12 @@ public class MusicPage extends AppCompatActivity {
         btnPlaySong.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                microphoneInput.run();
                 btnPlaySong.setVisibility(View.GONE);
                 try {
-                    assetFileDescriptor = getAssets().openFd("Audio.mp3");
-                    mediaPlayer.setDataSource(assetFileDescriptor.getFileDescriptor(),
-                            assetFileDescriptor.getStartOffset(),assetFileDescriptor.getLength());
-                    mediaPlayer.prepare();
+                    microphoneInput.run();
                     mediaPlayer.start();
-                    textAnimationThread.start();
-                } catch (IOException e) {
+                    textAnimation.run();
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -620,14 +693,23 @@ public class MusicPage extends AppCompatActivity {
 
     //Loading song, 1 - On Va Au Bal
     public void loadSong(int z) {
+        try {
+            assetFileDescriptor = getAssets().openFd("Audio.mp3");
+            mediaPlayer.setDataSource(assetFileDescriptor.getFileDescriptor(),
+                    assetFileDescriptor.getStartOffset(),assetFileDescriptor.getLength());
+            mediaPlayer.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         if (z == 1) {
             songAnimationDelay = new int[20];
 
             songText = new String[20];
             String line1 = "On va au bal";
             String line2 = "On va du ciel";
-            for (int i = 0; i < 14; i++) {
-                songAnimationDelay[i] = 250;
+            for (int i = 0; i < 15; i++) {
+                songAnimationDelay[i] = 400;
                 if (i < 4) {
                     songText[i] = line1;
                 }
@@ -639,56 +721,9 @@ public class MusicPage extends AppCompatActivity {
                 }
             }
             songAnimationDelay[0] = 6000;
+            songAnimationDelay[9] = 2000;
+            songAnimationDelay[10] = 2000;
         }
     }
 
-    //Text animation
-    Thread textAnimationThread = new Thread(new Runnable() {
-        int animationFlag = 1;
-        @Override
-        public void run() {
-            animPosition = 0; // 1 - Wait delay, 0 - do not.
-            int type = 1; // 1 - fadeIn, 2 - fadeOut.
-
-            while (true) {
-                if (animationFlag == 1) {
-                    try {
-                        Thread.sleep(songAnimationDelay[songPosition]);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                else {
-                    try {
-                        Thread.sleep(12);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                if (animPosition < 110) {
-                    animPosition++;
-                    type = 1;
-                    animationFlag = 0;
-                    Message message = textAnimationHandler.obtainMessage(type);
-                    message.sendToTarget();
-                } else if (songPosition < 14) {
-                    songPosition++;
-                    animPosition = 0;
-                    animationFlag = 1;
-                } else {
-                    type = 2;
-                    microphoneInput.stopRecording();
-                    mediaPlayer.release();
-                    mediaPlayer = null;
-                    animationFlag = 0;
-                    Message message2 = backgroundAnimationHandler.obtainMessage(type);
-                    message2.sendToTarget();
-                    Message message = textAnimationHandler.obtainMessage(type);
-                    message.sendToTarget();
-                    return;
-                }
-            }
-        }
-    });
 }
