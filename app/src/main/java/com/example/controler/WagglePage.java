@@ -11,8 +11,8 @@ import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 
+import com.example.controler.musicPage.MusicPage;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;

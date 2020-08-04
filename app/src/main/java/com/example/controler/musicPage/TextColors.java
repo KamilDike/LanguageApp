@@ -1,4 +1,4 @@
-package com.example.controler;
+package com.example.controler.musicPage;
 
 import android.graphics.Color;
 

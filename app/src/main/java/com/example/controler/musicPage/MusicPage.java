@@ -1,5 +1,6 @@
-package com.example.controler;
+package com.example.controler.musicPage;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -24,10 +25,19 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
+import com.example.controler.ContrlPage;
+import com.example.controler.GrabPage;
+import com.example.controler.LightPage;
+import com.example.controler.MainActivity;
+import com.example.controler.R;
+import com.example.controler.WagglePage;
+import com.example.controler.WaterPage;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,157 +48,18 @@ import java.io.IOException;
 
 public class MusicPage extends AppCompatActivity {
 
-    /**
-     * Class responsible for reading input from microphone.
-     */
-    public class MicrophoneInput {
-        private static final int SAMPLE_RATE = 44100;
-        private boolean recording;
-        private AudioRecord record;
-        private short[] data;
-        void recordAudio()
-        {
-            record.startRecording();
-            while(recording)
-            {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                int result = record.read(data, 0, SAMPLE_RATE/8); // read 0.25 second at a time
-
-                if(result == AudioRecord.ERROR_INVALID_OPERATION || result == AudioRecord.ERROR_BAD_VALUE)
-                {
-                    System.out.println("Recording error");
-                    return;
-                }
-                else
-                {
-                    Message message = backgroundAnimationHandler.obtainMessage(findMax(data));
-                    message.sendToTarget();
-                }
-            }
-            record.stop();
-        }
-
-        void run() {
-            if(!recording)
-            {
-                System.out.println("Recording Started");
-                int bufferSize = AudioRecord.getMinBufferSize(  SAMPLE_RATE,
-                        AudioFormat.CHANNEL_IN_MONO,
-                        AudioFormat.ENCODING_PCM_16BIT);
-
-                record = new AudioRecord(   MediaRecorder.AudioSource.MIC,
-                        SAMPLE_RATE,
-                        AudioFormat.CHANNEL_IN_MONO,
-                        AudioFormat.ENCODING_PCM_16BIT,
-                        bufferSize * 2);
-
-                data = new short[SAMPLE_RATE];
-
-                new Thread()
-                {
-                    @Override
-                    public void run()
-                    {
-                        recordAudio();
-                    }
-
-                }.start();
-
-                recording = true;
-            }
-            else
-            {
-                recording = false;
-            }
-        }
-
-        void stopRecording() { recording = false; }
-    }
-
-    /**
-     * Class responsible for animating text.
-     */
-    class TextAnimation {
-        boolean running;
-
-        void run() {
-            running = true;
-            animPosition = 0;
-
-            new Thread() {
-                @Override
-                public void run() {
-                    startAnimation();
-                }
-            }.start();
-        }
-
-        private void startAnimation() {
-            sleep(songAnimationDelay[songPosition]);
-            int type; // 1 - fadeIn, 0 - fadeOut.
-            while (running) {
-                System.out.println("SongPos: " + songPosition + "\nAnimPos: " + animPosition);
-                if (animPosition < 110 && songPosition < 14) {
-                    type = 1;
-                    animPosition++;
-                    Message message = textAnimationHandler.obtainMessage(type);
-                    message.sendToTarget();
-                    sleep(10);
-                } else if (songPosition < 14) {
-                    songPosition++;
-                    animPosition = 0;
-                    sleep(songAnimationDelay[songPosition]);
-                } else {
-                    animPosition = 0;
-                    type = 0;
-                    microphoneInput.stopRecording();
-                    //mediaPlayer.release();
-                    //mediaPlayer = null;
-                    Message message2 = backgroundAnimationHandler.obtainMessage(0);
-                    message2.sendToTarget();
-                    running = false;
-
-                    for (int i = 0; i < 110; i++) {
-                        animPosition++;
-                        Message message = textAnimationHandler.obtainMessage(type);
-                        message.sendToTarget();
-                        sleep(20);
-                    }
-                }
-            }
-        }
-
-        private void sleep(int time) {
-            try {
-                Thread.sleep(time);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        void stop() {
-            running = false;
-        }
-    }
+    CurrentSongValues currentSongValues;
 
     // UI objects.
     LinearLayout linearLayout;
     TextView textView;
     Button btnPlaySong;
 
-    int animPosition = 0;
-    int songPosition = 0;
-    int[] songAnimationDelay;
-    String[] songText;
     public TextColors colorsSlideIN;
     public TextColors colorsFadeOut;
     MicrophoneInput microphoneInput;
 
-    MediaPlayer mediaPlayer;
-    AssetFileDescriptor assetFileDescriptor;
+    AudioPlayer audioPlayer;
 
     private Boolean firstRead = true;
 
@@ -210,11 +81,13 @@ public class MusicPage extends AppCompatActivity {
 
         final View backgroundView = findViewById(R.id.ellipse_5);
 
+        permissionsCheck();
+
+        currentSongValues = new CurrentSongValues(1);
         loadBackgroundAnim(backgroundView);
-        songText = new String[20];
-        mediaPlayer = new MediaPlayer();
-        loadSong(1);
+        audioPlayer = new AudioPlayer(this);
         btnPlaySong = findViewById(R.id.btnPlaySong);
+        initializeHandlers();
 
         // Database config.
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -249,8 +122,6 @@ public class MusicPage extends AppCompatActivity {
                 firstRead= false;
             }
 
-
-
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 // Failed to read value
@@ -266,7 +137,7 @@ public class MusicPage extends AppCompatActivity {
                     playSong = dataSnapshot.getValue(Long.class);
                     if(!firstRead && playSong == 1) {
                         microphoneInput.run();
-                        mediaPlayer.start();
+                        audioPlayer.startSong();
                         textAnimation.run();
                     }
                 } catch (Exception e) {
@@ -281,8 +152,8 @@ public class MusicPage extends AppCompatActivity {
             }
         });
 
-        textAnimation = new TextAnimation();
-        microphoneInput = new MicrophoneInput();
+        textAnimation = new TextAnimation(backgroundAnimationHandler, textAnimationHandler, currentSongValues);
+        microphoneInput = new MicrophoneInput(backgroundAnimationHandler);
 
         colorsSlideIN = new TextColors(Color.parseColor("#FFFFFFFF"), Color.parseColor("#00D2003C"));
         colorsFadeOut = new TextColors(Color.parseColor("#00D2003C"), Color.parseColor("#FFFFFFFF"));
@@ -291,7 +162,38 @@ public class MusicPage extends AppCompatActivity {
 
         linearLayout.bringToFront();
 
-        listingPermissions();
+        btnPlaySong.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btnPlaySong.setVisibility(View.GONE);
+                try {
+                    microphoneInput.run();
+                    audioPlayer.startSong();
+                    textAnimation.run();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public void initializeHandlers() {
+        textAnimationHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(@NonNull Message message) {
+                if (message.what == 1)
+                    paintText(1);
+                else if (message.what == 0) {
+                    paintText(0);
+                    if (currentSongValues.animPosition == 110)
+                    {
+                        btnPlaySong.setVisibility(View.VISIBLE);
+                        currentSongValues.songPosition = 0;
+                        textAnimation.stop();
+                    }
+                }
+            }
+        };
 
         //Using handler to manage UI, within main thread.
         backgroundAnimationHandler = new Handler(Looper.getMainLooper()) {
@@ -300,38 +202,8 @@ public class MusicPage extends AppCompatActivity {
                 animateBackground(message.what);
             }
         };
-
-        textAnimationHandler = new Handler(Looper.getMainLooper()) {
-            @Override
-            public void handleMessage(@NonNull Message message) {
-                if (message.what == 1)
-                    paintText(1);
-                else if (message.what == 0) {
-                    paintText(0);
-                    if (animPosition == 110)
-                    {
-                        btnPlaySong.setVisibility(View.VISIBLE);
-                        songPosition = 0;
-                        textAnimation.stop();
-                    }
-                }
-            }
-        };
-
-        btnPlaySong.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                btnPlaySong.setVisibility(View.GONE);
-                try {
-                    microphoneInput.run();
-                    mediaPlayer.start();
-                    textAnimation.run();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
     }
+
     public void resetMousePointer(View view) {
         // Write a message to the database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -348,11 +220,11 @@ public class MusicPage extends AppCompatActivity {
 
         //choice 1 = slideIN , 0 = fadeOut
         if (choice == 1)
-            colorsSlideIN.setSlideColors(animPosition);
-        else colorsFadeOut.setFadeColors(animPosition);
+            colorsSlideIN.setSlideColors(currentSongValues.animPosition);
+        else colorsFadeOut.setFadeColors(currentSongValues.animPosition);
 
         textView = new TextView(MusicPage.this);
-        textView.setText(songText[songPosition]);
+        textView.setText(currentSongValues.songText[currentSongValues.songPosition]);
         textView.setTextSize(40);
 
         Shader textShader;
@@ -411,67 +283,9 @@ public class MusicPage extends AppCompatActivity {
     /**
      * Method responsible for listing currently granted permissions.
      */
-    public void listingPermissions() {
-        try {
-            PackageInfo info = getPackageManager().getPackageInfo(getApplicationContext().getPackageName(), PackageManager.GET_PERMISSIONS);
-            String[] permissions = info.requestedPermissions;
-            for (String permission : permissions) {
-                System.out.println(permission);
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+    public void permissionsCheck() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 100);
         }
     }
-
-    /**
-     * Method responsible for finding max value in array of shorts.
-     * @param arr Array of shorts.
-     * @return Returning maximum value in array.
-     */
-    public short findMax(final short[] arr) {
-        short o_intMax = arr[0];
-        for ( int p_intI = 1; p_intI < arr.length; p_intI++)
-            if ( arr[p_intI] > o_intMax )
-                o_intMax = arr[p_intI];
-        return o_intMax;
-    } // end method
-
-    /**
-     * Setting delays, text for chosen song.
-     * @param z choosing song from library.
-     */
-    public void loadSong(int z) {
-        try {
-            assetFileDescriptor = getAssets().openFd("Audio.mp3");
-            mediaPlayer.setDataSource(assetFileDescriptor.getFileDescriptor(),
-                    assetFileDescriptor.getStartOffset(),assetFileDescriptor.getLength());
-            mediaPlayer.prepare();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (z == 1) {
-            songAnimationDelay = new int[20];
-
-            songText = new String[20];
-            String line1 = "On va au bal";
-            String line2 = "On va du ciel";
-            for (int i = 0; i < 15; i++) {
-                songAnimationDelay[i] = 400;
-                if (i < 4) {
-                    songText[i] = line1;
-                }
-                else if (i < 8) {
-                    songText[i] = line2;
-                }
-                else {
-                    songText[i] = line1;
-                }
-            }
-            songAnimationDelay[0] = 6000;
-            songAnimationDelay[9] = 2000;
-            songAnimationDelay[10] = 2000;
-        }
-    }
-
 }

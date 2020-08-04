@@ -13,16 +13,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import static android.hardware.Sensor.TYPE_LIGHT;
-import static java.lang.Math.asin;
-import static java.lang.Math.tan;
 
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
-import android.os.Bundle;
-import android.view.View;
-
+import com.example.controler.musicPage.MusicPage;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
