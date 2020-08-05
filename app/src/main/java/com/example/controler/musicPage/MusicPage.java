@@ -48,24 +48,23 @@ import java.io.IOException;
 
 public class MusicPage extends AppCompatActivity {
 
-    CurrentSongValues currentSongValues;
-
     // UI objects.
     LinearLayout linearLayout;
     TextView textView;
     Button btnPlaySong;
+    View backgroundView;
 
     public TextColors colorsSlideIN;
     public TextColors colorsFadeOut;
-    MicrophoneInput microphoneInput;
 
+    MicrophoneInput microphoneInput;
+    CurrentSongValues currentSongValues;
     AudioPlayer audioPlayer;
 
     private Boolean firstRead = true;
 
     // Spring Animation.
-    private SpringAnimation springAnimScaleX;
-    private SpringAnimation springAnimScaleY;
+    BackgroundAnimation backgroundAnimation;
 
     //Handler for ui, main thread.
     Handler backgroundAnimationHandler;
@@ -78,13 +77,15 @@ public class MusicPage extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_music_page);
-
-        final View backgroundView = findViewById(R.id.ellipse_5);
-
         permissionsCheck();
 
+        backgroundView = findViewById(R.id.ellipse_5);
+        linearLayout = findViewById(R.id.linearLayoutText);
+        linearLayout.bringToFront();
+        backgroundAnimation = new BackgroundAnimation(backgroundView);
+
         currentSongValues = new CurrentSongValues(1);
-        loadBackgroundAnim(backgroundView);
+
         audioPlayer = new AudioPlayer(this);
         btnPlaySong = findViewById(R.id.btnPlaySong);
         initializeHandlers();
@@ -158,10 +159,6 @@ public class MusicPage extends AppCompatActivity {
         colorsSlideIN = new TextColors(Color.parseColor("#FFFFFFFF"), Color.parseColor("#00D2003C"));
         colorsFadeOut = new TextColors(Color.parseColor("#00D2003C"), Color.parseColor("#FFFFFFFF"));
 
-        linearLayout = findViewById(R.id.linearLayoutText);
-
-        linearLayout.bringToFront();
-
         btnPlaySong.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -199,7 +196,7 @@ public class MusicPage extends AppCompatActivity {
         backgroundAnimationHandler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message message) {
-                animateBackground(message.what);
+                backgroundAnimation.animateBackground(message.what);
             }
         };
     }
@@ -241,43 +238,6 @@ public class MusicPage extends AppCompatActivity {
 
         linearLayout.removeAllViews();
         linearLayout.addView(textView);
-    }
-
-    /**
-     * Function loads SpringAnimation Objects.
-     * @param view current View.
-     */
-    public void loadBackgroundAnim(View view) {
-        
-        springAnimScaleX = new SpringAnimation(view,DynamicAnimation.SCALE_X,0);
-        springAnimScaleY = new SpringAnimation(view,DynamicAnimation.SCALE_Y,0);
-
-        springAnimScaleX.setStartValue(0);
-        springAnimScaleX.setMinValue(-200);
-        springAnimScaleX.setMaxValue((float)200); // in radians
-        springAnimScaleX.getSpring().setDampingRatio(SpringForce.DAMPING_RATIO_HIGH_BOUNCY);
-        springAnimScaleX.getSpring().setStiffness(SpringForce.STIFFNESS_HIGH);
-
-        springAnimScaleY.setStartValue(0);
-        springAnimScaleY.setMinValue(-200);
-        springAnimScaleY.setMaxValue((float)200); // in radians
-        springAnimScaleY.getSpring().setDampingRatio(SpringForce.DAMPING_RATIO_HIGH_BOUNCY);
-        springAnimScaleY.getSpring().setStiffness(SpringForce.STIFFNESS_HIGH);
-    }
-
-    /**
-     * Function animates background.
-     * @param value describes current microphone reading.
-     */
-    public void animateBackground(float value) {
-        if (value > 5000)
-            value = (float) 0.75;
-        else if (value > 500)
-            value = (float) (0.75*(value/5000));
-        else value = 0;
-
-        springAnimScaleX.animateToFinalPosition((float) (1.0 + value*0.5));
-        springAnimScaleY.animateToFinalPosition((float) (1.0 + value));
     }
 
     /**

@@ -7,7 +7,7 @@ public class CurrentSongValues {
     String[] songText = new String[20];
 
     public CurrentSongValues(int song) {
-        loadSong(1);
+        loadSong(song);
     }
 
     private void loadSong(int song) {
